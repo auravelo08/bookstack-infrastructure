@@ -4,3 +4,5 @@ stages:
 test:
     script:
         - echo "coucou runner"
+    tags:
+        - bookstack-runner
