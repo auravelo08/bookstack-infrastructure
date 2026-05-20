@@ -1,0 +1,93 @@
+---
+- name: Installation de GitLab Runner sur l'instance privee
+  hosts: gitlab_runner # Cible uniquement cette machine de votre inventaire
+  become: yes # S'exécute en mode sudo (root)
+
+  tasks:
+      - name: Télécharger le script d'installation du dépôt officiel GitLab
+        ansible.builtin.get_url:
+            url: https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh
+            dest: /tmp/script.deb.sh
+            mode: "0744"
+
+      - name: Executer le script pour ajouter le dépôt APT
+        ansible.builtin.command: /tmp/script.deb.sh
+        environment:
+            os: ubuntu
+            dist: jammy
+        args:
+            creates: /etc/apt/sources.list.d/runner_gitlab-runner.list
+
+      - name: Installer le paquet gitlab-runner via apt
+        ansible.builtin.apt:
+            name: gitlab-runner
+            state: present
+            update_cache: yes
+
+      - name: S'assurer que le service gitlab-runner est démarré
+        ansible.builtin.systemd:
+            name: gitlab-runner
+            state: started
+            enabled: yes
+
+      - name: Installer les dépendances pour Docker
+        ansible.builtin.apt:
+            name:
+                - apt-transport-https
+                - ca-certificates
+                - curl
+                - gnupg
+                - lsb-release
+            state: present
+            update_cache: yes
+
+      - name: Créer le dossier pour la clé GPG de Docker
+        ansible.builtin.file:
+            path: /etc/apt/keyrings
+            state: directory
+            mode: "0755"
+
+      - name: Ajouter la clé GPG officielle de Docker
+        ansible.builtin.get_url:
+            url: https://download.docker.com/linux/ubuntu/gpg
+            dest: /etc/apt/keyrings/docker.asc
+            mode: "0644"
+
+      - name: Ajouter le dépôt APT officiel de Docker (Forcé sur Jammy pour stabilité)
+        ansible.builtin.apt_repository:
+            repo: "deb [signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu jammy stable"
+            filename: docker
+            state: present
+
+      - name: Installer Docker Engine et ses outils
+        ansible.builtin.apt:
+            name:
+                - docker-ce
+                - docker-ce-cli
+                - containerd.io
+                - docker-buildx-plugin
+                - docker-compose-plugin
+            state: present
+            update_cache: yes
+
+      - name: S'assurer que le service Docker est démarré et activé
+        ansible.builtin.systemd:
+            name: docker
+            state: started
+            enabled: yes
+
+      - name: Ajouter l'utilisateur gitlab-runner au groupe docker
+        ansible.builtin.user:
+            name: gitlab-runner
+            groups: docker
+            append: yes
+
+      - name: Enregistrer le GitLab Runner auprès de l'instance GitLab
+        ansible.builtin.command: >
+            gitlab-runner register
+            --non-interactive
+            --url "https://gitlab.com"
+            --token 'glrt-dy-WJNLmR7Sc0ZDzvcxM7mM6MQpvOjEKcDoxZDBuaWMKdDozCnU6bGF0Mncc.01.1o1wbepjm'
+            --executor "docker"
+            --docker-image ubuntu:latest
+            --description "Runner pour Bookstack"

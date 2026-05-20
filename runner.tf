@@ -50,7 +50,7 @@ resource "aws_iam_instance_profile" "gitlab_runner_profile" {
 }
 
 resource "aws_instance" "gitlab_runner" {
-  ami                    = "ami-01ef747f983799d6f" # Debian 12 AWS
+  ami                    = var.ami_id
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.private[0].id
   vpc_security_group_ids = [aws_security_group.gitlab_runner_sg.id]
