@@ -1,8 +1,29 @@
 stages:
     - test
+    - update-bastion
 
 test:
     script:
         - echo "coucou runner"
     tags:
         - bookstack-runner
+
+gitlab-bastion:
+    stage: update-bastion
+    variables:
+        TF_HTTP_USERNAME: ""  # À définir ici aussi
+        TF_HTTP_PASSWORD: ""  # ou au niveau global
+        TF_IN_AUTOMATION: "true"  # Indique à Terraform qu'il tourne en CI
+    script:
+        - terraform init 
+        - terraform fmt 
+        - terraform validate
+        - terraform plan -lock=false
+        - terraform apply -lock=false -auto-approve
+    tags:
+        - bookstack-runner
+
+    rules:
+        - if: $CI_COMMIT_BRANCH == "main"
+          when: always
+
