@@ -89,13 +89,16 @@
         name: gitlab-runner
         state: restarted
 
+    - name: Supprimer l'ancien fichier de configuration GitLab Runner
+      ansible.builtin.file:
+        path: /etc/gitlab-runner/config.toml
+        state: absent
+
     - name: Enregistrer le GitLab Runner auprès de l'instance GitLab
       ansible.builtin.command: >
         gitlab-runner register
         --non-interactive
         --url "https://gitlab.com"
         --token "{{ gitlab_registration_token }}"
-        --executor "docker"
-        --docker-image ubuntu:latest
+        --executor "shell"
         --description "Runner pour Bookstack"
-        --docker-privileged
