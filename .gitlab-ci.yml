@@ -16,25 +16,26 @@ stages:
 
 deploy-infra:
   stage: deploy
-  image: 
-    name: hashicorp/terraform:latest
-    entrypoint: [""]
-  services:
-    - docker:dind
+  # image ignorée car runner shell
   id_tokens:
     TERRAFORM_TOKEN:
       aud: $CI_SERVER_URL
   variables:
     TF_IN_AUTOMATION: "true"
+    TF_HTTP_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/bastion"
+    TF_HTTP_USERNAME: "$CI_PROJECT_ID"
+    TF_HTTP_PASSWORD: "$TERRAFORM_TOKEN"
   before_script:
-    - export TF_HTTP_USERNAME=$CI_PROJECT_ID
-    - export TF_HTTP_PASSWORD=$TERRAFORM_TOKEN
+    - echo "Terraform path: $(which terraform)"
+    - terraform version
   script:
-    - terraform init
+    - terraform init -input=false
     - terraform fmt -check
     - terraform validate
-    - terraform plan -lock=false
-    # - terraform apply -lock=false -auto-approve
+    - terraform plan -lock=false -input=false
+  tags:
+    - bs-runner-2
+
   tags:
     - bs-runner-2
 #   rules:
