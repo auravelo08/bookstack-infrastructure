@@ -5,9 +5,10 @@ stages:
 deploy-infracost:
     stage: infracost
     image: infracost/infracost:latest
+    entrypoint: [""]
     script:
         - infracost breakdown --path=.
-        - infracost output --path infracost-output.json --format json
+        - infracost output --format=github-comment --path=infracost.json
     tags:
         - bookstack-runner
     # rules:
