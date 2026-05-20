@@ -8,31 +8,25 @@ infracost-check:
   image: alpine:latest
   variables:
     INFRACOST_API_KEY: $INFRACOST_API_KEY
-    # Optionnel : Limite d'augmentation de coût en % (ex: 10% = 0.10)
-    # INFRACOST_DIFF_LIMIT: "0.10" 
   script:
-    # Installation des dépendances nécessaires
-    - apk add --no-cache curl unzip tar
-    # Téléchargement et installation de la dernière version d'Infracost
-    - curl -sSL https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.sh | sh
-    # Exécution de l'analyse
-    # --path=. analyse le dossier racine. Si vos fichiers .tf sont dans un sous-dossier, changez le chemin.
-    - infracost breakdown --path=. --format json --out-file infracost-output.json
-    # Affichage d'un résumé lisible dans les logs
-    - infracost format --path infracost-output.json
-    # (Optionnel) Vérification des limites de coût si la variable INFRACOST_DIFF_LIMIT est définie
-    # - infracost diff --path=. --format json --out-file infracost-diff.json
-    # - infracost diff --path=. --format table
+    # 1. Installer curl et tar (nécessaire pour extraire le .tar.gz)
+    - apk add --no-cache curl tar
+    # 2. Télécharger directement le binaire pré-compilé (version stable récente)
+    # Note: On utilise une URL directe vers le release asset
+    - curl -sL https://github.com/infracost/infracost/releases/download/v0.10.44/infracost-linux-amd64.tar.gz -o infracost.tar.gz
+    # 3. Extraire l'archive
+    - tar -xzf infracost.tar.gz
+    # 4. Rendre le binaire exécutable
+    - chmod +x infracost-linux-amd64
+    # 5. Exécuter l'analyse
+    - ./infracost-linux-amd64 breakdown --path=. --format json --out-file infracost-output.json
+    - ./infracost-linux-amd64 format --path infracost-output.json
   artifacts:
     paths:
       - infracost-output.json
     expire_in: 1 week
-#   rules:
-#     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-#     - if: $CI_COMMIT_BRANCH == "main"
   tags:
     - bookstack-runner
-
 # 2. Job de déploiement (Terraform)
 deploy-infra:
   stage: deploy
