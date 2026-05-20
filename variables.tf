@@ -14,3 +14,8 @@ variable "keypair_name" {
   description = "SSH keypair name"
   type        = string
 }
+
+variable "ami_id" {
+  description = "AMI Ubuntu 26.04"
+  type        = string
+}
