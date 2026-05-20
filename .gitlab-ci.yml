@@ -11,7 +11,7 @@ infracost-breakdown:
     name: infracost/infracost:ci-0.10
     entrypoint: [""]
   script:
-    - echo "KEY=${INFRACOST_API_KEY}"
+    - echo $INFRACOST_API_KEY
     - infracost breakdown --path=. --format=json --out-file=infracost.json
   tags:
     - bookstack-runner
