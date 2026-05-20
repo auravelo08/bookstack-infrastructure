@@ -11,12 +11,8 @@ infracost-breakdown:
     name: infracost/infracost:ci-0.10
     entrypoint: [""]
   script:
+    - echo "KEY=${INFRACOST_API_KEY}"
     - infracost breakdown --path=. --format=json --out-file=infracost.json
-    - infracost diff --path=. --compare-to=main --format=json --out-file=infracost_diff.json
-    # - infracost comment gitlab --path=infracost_diff.json --behavior=update
-    - infracost diff --path=. --compare-to=main --threshold-percent=10
-  # rules:
-  #   - if: $CI_MERGE_REQUEST_IID
   tags:
     - bookstack-runner
 
