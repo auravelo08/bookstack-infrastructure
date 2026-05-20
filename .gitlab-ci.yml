@@ -13,7 +13,7 @@ infracost-check:
     - bookstack-runner
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == "main"
-
+#
 deploy-infra:
   stage: deploy
   image: hashicorp/terraform:latest
