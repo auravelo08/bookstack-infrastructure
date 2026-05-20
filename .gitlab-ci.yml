@@ -8,11 +8,18 @@ deploy-infracost:
     variables:
         INFRACOST_API_KEY: $INFRACOST_API_KEY
     script:
-        - apk add --no-cache curl unzip
-        - curl -sSL https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.sh | sh
-        - tar -xzf infracost.tar.gz
-        - chmod +x infracost-linux-amd64
-        - ./infracost-linux-amd64 breakdown --path=.
+        - apk add --no-cache curl tar
+        - export INFRACOST_VERSION="0.10.44" # Utiliser une version spécifique et stable
+        - echo "Installation de infracost version ${INFRACOST_VERSION}..."
+        - curl -sL "https://github.com/infracost/infracost/releases/download/v${INFRACOST_VERSION}/infracost-linux-amd64.tar.gz" -o /tmp/infracost.tar.gz
+        - tar -xzf /tmp/infracost.tar.gz -C /tmp
+        - chmod +x "/tmp/infracost-linux-amd64"
+        - mkdir -p $HOME/bin
+        - mv "/tmp/infracost-linux-amd64" "$HOME/bin/infracost"
+        - export PATH="$HOME/bin:$PATH"
+        - echo "$HOME/bin" >> $CI_PROJECT_DIR/.gitlab.env # Persister le PATH pour la suite du job
+        - infracost --version
+        - infracost breakdown --path=.
     tags:
         - bookstack-runner
     # rules:
