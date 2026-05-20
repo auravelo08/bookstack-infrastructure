@@ -1,0 +1,37 @@
+---
+- name: Install and configure Fail2ban on bastion
+  hosts: bastion
+  become: true
+
+  tasks:
+    - name: Install fail2ban
+      apt:
+        name: fail2ban
+        state: present
+        update_cache: true
+
+    - name: Ensure fail2ban is running
+      service:
+        name: fail2ban
+        state: started
+        enabled: true
+
+    - name: Deploy jail.local
+      copy:
+        dest: /etc/fail2ban/jail.local
+        content: |
+          [DEFAULT]
+          bantime = 10m
+          findtime = 10m
+          maxretry = 5
+          backend = systemd
+
+          [sshd]
+          enabled = true
+          port = 22
+          filter = sshd
+
+    - name: Restart fail2ban
+      service:
+        name: fail2ban
+        state: restarted

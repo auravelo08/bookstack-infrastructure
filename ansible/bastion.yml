@@ -1,0 +1,33 @@
+bastion:
+   hosts:
+      bastion1:
+       ansible_host: "51.21.131.18" 
+       ansible_port: 2026
+       ansible_ssh_private_key_file: "/home/engineer/.ssh/bs-caps-project.pem"
+       ansible_user: "ubuntu" 
+       ansible_python_interpreter: /usr/bin/python3
+   
+#   vars:
+#     # L'utilisateur par défaut pour vos instances
+#     ansible_user: ubuntu
+#     # Le chemin vers la clé SSH privée commune
+#     ansible_ssh_private_key_file: ~/.ssh/bs-caps-project.pem
+#     # Sécurité : ignore la validation de clé pour les instances privées finales
+#     ansible_ssh_extra_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+#   children:
+#     prive:
+#       hosts:
+#         swarm_master:
+#           ansible_host: 10.0.173.62
+#         swarm_worker_1:
+#           ansible_host: 10.0.181.58
+#         swarm_worker_2:
+#           ansible_host: 10.0.195.220
+#         gitlab_runner:
+#           ansible_host: 10.0.173.47
+
+#       vars:
+#         # Configuration du rebond SSH (Bypass strict checking inclus pour le bastion)
+#         ansible_ssh_common_args: >-
+#           -o ProxyCommand="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p -q -i ~/.ssh/bs-caps-project.pem ubuntu@51.21.131.18"

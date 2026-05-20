@@ -1,8 +1,20 @@
 stages:
     - test
+    - update-bastion
 
 test:
     script:
         - echo "coucou runner"
+    tags:
+        - bookstack-runner
+
+gitlab-bastion:
+    stage: update-bastion
+    script:
+        - terraform init 
+        - terraform fmt 
+        - terraform validate
+        - terraform plan -lock=false
+        - terraform apply -lock=false -auto-approve
     tags:
         - bookstack-runner

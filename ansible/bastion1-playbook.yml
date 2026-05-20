@@ -1,0 +1,76 @@
+---
+- name: Configuration du serveur bastion
+  hosts: bastion
+  become: yes
+  vars:
+    ssh_port: 2026
+    allowed_user: bastion
+    source_public_key: "/home/engineer/.ssh/bs-caps-project.pub"  # À ajuster selon votre environnement
+
+  tasks:
+    - name: Test connection
+      ansible.builtin.ping:
+
+    - name: Créer utilisateur bastion
+      ansible.builtin.user:
+        name: "{{ allowed_user }}"
+        shell: /bin/bash
+        create_home: true
+        groups: sudo
+        append: true
+
+    - name: Créer dossier .ssh pour bastion
+      ansible.builtin.file:
+        path: "/home/{{ allowed_user }}/.ssh"
+        state: directory
+        owner: "{{ allowed_user }}"
+        group: "{{ allowed_user }}"
+        mode: '0700'
+
+    - name: Ajouter clé publique pour bastion
+      ansible.posix.authorized_key:
+        user: "{{ allowed_user }}"
+        key: "{{ lookup('file', source_public_key) }}"
+        state: present
+
+    - name: Configurer SSH - Hardening
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^{{ item.key }}'
+        line: '{{ item.key }} {{ item.value }}'
+        state: present
+        insertafter: EOF
+      loop:
+        - { key: 'Port', value: '{{ ssh_port }}' }
+        - { key: 'PermitRootLogin', value: 'no' }
+        - { key: 'PasswordAuthentication', value: 'no' }
+        - { key: 'AllowUsers', value: '{{ allowed_user }}' }
+        - { key: 'PermitTunnel', value: 'no' }
+        - { key: 'X11Forwarding', value: 'no' }
+      notify: 
+        - "Redémarrer SSH"
+        - "Recharger le daemon"
+        - "Redémarrer SSH socket"
+
+    - name: Créer groupe bookstack-team
+      ansible.builtin.group:
+        name: bookstack-team
+        state: present
+    
+    
+
+  handlers:
+    - name: Redémarrer SSH
+      ansible.builtin.systemd:
+        name: ssh
+        state: restarted
+      become: yes
+    - name: Recharger le daemon
+      systemd:
+          daemon_reload: true
+      become: yes
+    - name: Redémarrer SSH socket
+      systemd:
+          name: ssh.socket
+          state: restarted
+      become: yes
