@@ -1,10 +1,6 @@
 stages:
   - infracost
   # - deploy
-
-variables:
-  INFRACOST_API_KEY: $INFRACOST_API_KEY
-
 infracost-breakdown:
   stage: infracost
   image:
