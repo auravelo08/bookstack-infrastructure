@@ -10,7 +10,7 @@ stages:
 #     - echo $INFRACOST_API_KEY
 #     - infracost breakdown --path=. --format=json --out-file=infracost.json
 #   tags:
-#     - bookstack-runner
+    # - bs-runner-2
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == "main"
 
@@ -19,18 +19,22 @@ deploy-infra:
   image: 
     name: hashicorp/terraform:latest
     entrypoint: [""]
+  id_tokens:
+    TERRAFORM_TOKEN:
+      aud: $CI_SERVER_URL
   variables:
     TF_IN_AUTOMATION: "true"
+  before_script:
+    - export TF_HTTP_USERNAME=$CI_PROJECT_ID
+    - export TF_HTTP_PASSWORD=$TERRAFORM_TOKEN
     
   script:
-    - echo $TF_HTTP_USERNAME
-    - echo $TF_HTTP_PASSWORD
     - terraform init
     - terraform fmt -check
     - terraform validate
     - terraform plan -lock=false
     # - terraform apply -lock=false -auto-approve
   tags:
-    - bookstack-runner
+    - bs-runner-2
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == "main"
