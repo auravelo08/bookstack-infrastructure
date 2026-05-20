@@ -7,6 +7,7 @@ deploy-infracost:
     image: infracost/infracost:latest
     script:
         - infracost breakdown --path=.
+        - infracost output --path infracost-output.json --format json
     tags:
         - bookstack-runner
     # rules:
