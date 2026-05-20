@@ -33,4 +33,4 @@ deploy-infra:
     # rules:
     #     - if: $CI_COMMIT_BRANCH == "main"
     #       when: always
-
+    #
