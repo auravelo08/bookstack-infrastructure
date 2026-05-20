@@ -1,16 +1,25 @@
 stages:
-  # - infracost
-  - deploy
-# infracost-breakdown:
-#   stage: infracost
-#   image:
-#     name: infracost/infracost:ci-0.10
-#     entrypoint: [""]
-#   script:
-#     - echo $INFRACOST_API_KEY
-#     - infracost breakdown --path=. --format=json --out-file=infracost.json
-#   tags:
-    # - bs-runner-2
+  - infracost
+  # - deploy
+infracost-breakdown:
+  stage: infracost
+  image:
+    name: infracost/infracost:ci-0.10
+    entrypoint: [""]
+  variables:
+    INFRACOST_API_KEY: $INFRACOST_API_KEY
+  script:
+    - echo $INFRACOST_API_KEY
+    - infracost breakdown --path=. --format=json --out-file=infracost.json
+    - infracost output --path=infracost.json --format=table
+  
+  artifacts:
+    paths:
+      - infracost.json
+    expire_in: 1 week
+    
+  tags:
+    - bs-runner-2
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == "main"
 
