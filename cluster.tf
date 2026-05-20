@@ -61,8 +61,7 @@ resource "aws_instance" "swarm_nodes" {
 
   ami           = var.ami_id
   instance_type = "t3.small"
-
-  subnet_id = aws_subnet.private[count.index].id
+  subnet_id     = aws_subnet.private[count.index % length(aws_subnet.private)].id
 
   vpc_security_group_ids = [
     aws_security_group.swarm_nodes.id

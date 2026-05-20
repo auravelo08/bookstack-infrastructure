@@ -3,7 +3,7 @@ variable "region" {
 }
 
 variable "azs" {
-  default = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
+  default = ["eu-north-1a", "eu-north-1b"]
 }
 
 variable "dev_ips" {

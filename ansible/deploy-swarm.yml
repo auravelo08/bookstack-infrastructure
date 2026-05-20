@@ -3,80 +3,90 @@
   hosts: swarm_master, swarm_worker_1, swarm_worker_2
   become: true
   tasks:
-      - name: Installer les prérequis pour Docker
-        apt:
-            name:
-                - apt-transport-https
-                - ca-certificates
-                - curl
-                - gnupg
-                - lsb-release
-            state: present
-            update_cache: true
+    - name: Installer les prérequis pour Docker
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+        update_cache: true
 
-      - name: Créer le dossier pour les clés de dépôts (keyrings)
-        file:
-            path: /etc/apt/keyrings
-            state: directory
-            mode: "0755"
+    - name: Créer le dossier pour les clés de dépôts (keyrings)
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
 
-      - name: Télécharger la clé GPG officielle de Docker (Nouvelle méthode)
-        get_url:
-            url: https://download.docker.com/linux/ubuntu/gpg
-            dest: /etc/apt/keyrings/docker.asc
-            mode: "0644"
-            force: true
+    - name: Télécharger la clé GPG officielle de Docker (Nouvelle méthode)
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+        force: true
 
-      - name: Ajouter le dépôt Docker stable (Nouvelle méthode)
-        apt_repository:
-            repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-            state: present
-            filename: docker
+    - name: Ajouter le dépôt Docker stable (Nouvelle méthode)
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
 
-      - name: Installer le moteur Docker (Docker Engine)
-        apt:
-            name:
-                - docker-ce
-                - docker-ce-cli
-                - containerd.io
-            state: present
-            update_cache: true
+    - name: Installer le moteur Docker (Docker Engine)
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+        update_cache: true
 
-      - name: Démarrer et activer le service Docker
-        systemd:
-            name: docker
-            state: started
-            enabled: true
+    - name: Démarrer et activer le service Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Ajouter l'utilisateur ubuntu au groupe docker
+      user:
+        name: ubuntu
+        groups: docker
+        append: true
+
+    - name: Forcer la prise en compte du nouveau groupe sans redémarrer
+      meta: reset_connection
 
 - name: Initialiser le Swarm sur le Master
   hosts: swarm_master
   become: true
   tasks:
-      - name: Initialiser le Docker Swarm
-        command: "docker swarm init --advertise-addr {{ ansible_host }}"
-        register: swarm_init_result
-        failed_when:
-            - swarm_init_result.rc != 0
-            - "'this node is already part of a swarm' not in swarm_init_result.stderr"
+    - name: Initialiser le Docker Swarm
+      command: "docker swarm init --advertise-addr {{ ansible_host }}"
+      register: swarm_init_result
+      # On assouplit la condition pour accepter le fait qu'il soit déjà dans un swarm
+      failed_when:
+        - swarm_init_result.rc != 0
+        - "'already part of a swarm' not in swarm_init_result.stderr"
 
-      - name: Récupérer le token de jointure pour les Workers
-        command: docker swarm join-token -q worker
-        register: worker_token_output
-        changed_when: false
+    - name: Récupérer le token de jointure pour les Workers
+      command: docker swarm join-token -q worker
+      register: worker_token_output
+      changed_when: false
 
-      - name: Mettre le token et l'IP en mémoire de session
-        add_host:
-            name: "SWARM_VARS"
-            token: "{{ worker_token_output.stdout }}"
-            manager_ip: "{{ ansible_host }}"
+    - name: Mettre le token et l'IP en mémoire de session
+      add_host:
+        name: "SWARM_VARS"
+        token: "{{ worker_token_output.stdout }}"
+        manager_ip: "{{ ansible_host }}"
 
 - name: Rejoindre le Swarm en tant que Worker
   hosts: swarm_worker_1, swarm_worker_2
   become: true
   tasks:
-      - name: Rejoindre le cluster Swarm
-        command: "docker swarm join --token {{ hostvars['SWARM_VARS']['token'] }} {{ hostvars['SWARM_VARS']['manager_ip'] }}:2377"
-        register: worker_join_result
-        failed_when:
-            - worker_join_result.rc != 0
-            - "'this node is already part of a swarm' not in worker_join_result.stderr"
+    - name: Rejoindre le cluster Swarm
+      command: "docker swarm join --token {{ hostvars['SWARM_VARS']['token'] }} {{ hostvars['SWARM_VARS']['manager_ip'] }}:2377"
+      register: worker_join_result
+      failed_when:
+        - worker_join_result.rc != 0
+        - "'already part of a swarm' not in worker_join_result.stderr"
