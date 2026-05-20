@@ -15,7 +15,7 @@ infracost-breakdown:
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == "main"
 
-deploy-infra:
+deploy-infrastructure:
   stage: deploy
   image: hashicorp/terraform:latest
   script:
