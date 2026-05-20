@@ -1,28 +1,31 @@
 stages:
-    - test
-    - update-bastion
-
-test:
-    script:
-        - echo "coucou runner"
-    tags:
-        - bookstack-runner
-
-gitlab-bastion:
-    stage: update-bastion
-    variables:
+    - infracost
+    - deploy
+variables:
         TF_HTTP_USERNAME: ""  # À définir ici aussi
         TF_HTTP_PASSWORD: ""  # ou au niveau global
         TF_IN_AUTOMATION: "true"  # Indique à Terraform qu'il tourne en CI
+
+deploy-infracost:
+    stage: infracost
+    image: infracost/infracost:latest
     script:
-        - terraform init 
-        - terraform fmt 
-        - terraform validate
-        - terraform plan -lock=false
-        - terraform apply -lock=false -auto-approve
+        - infracost breakdown --path=.
     tags:
         - bookstack-runner
-
+    rules:
+        - if: $CI_COMMIT_BRANCH == "main"
+          when: always
+deploy-infra:
+    stage: deploy
+    script:
+        - terraform init 
+        - terraform fmt -check
+        - terraform validate
+        - terraform plan -lock=false
+        # - terraform apply -lock=false -auto-approve
+    tags:
+        - bookstack-runner
     rules:
         - if: $CI_COMMIT_BRANCH == "main"
           when: always
