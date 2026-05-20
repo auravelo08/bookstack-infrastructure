@@ -21,6 +21,8 @@ deploy-infra:
     entrypoint: [""]
   variables:
     TF_IN_AUTOMATION: "true"
+    TF_HTTP_USERNAME: "${CI_PROJECT_ID}"
+    TF_HTTP_PASSWORD: "${CI_JOB_TOKEN}"
   script:
     - terraform init
     - terraform fmt -check
