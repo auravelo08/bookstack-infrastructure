@@ -1,14 +1,14 @@
 stages:
   - infracost
-  - deploy
-
-infracost-check:
+  # - deploy
+infracost-breakdown:
   stage: infracost
-  image:  infracost/infracost:ci-0.10
-  variables:
-    INFRACOST_API_KEY: $INFRACOST_API_KEY
+  image:
+    name: infracost/infracost:ci-0.10
+    entrypoint: [""]
   script:
-    - infracost breakdown --path=.
+    - echo $INFRACOST_API_KEY
+    - infracost breakdown --path=. --format=json --out-file=infracost.json
   tags:
     - bookstack-runner
 #   rules:
