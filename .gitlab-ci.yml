@@ -5,10 +5,8 @@ stages:
 deploy-infracost:
     stage: infracost
     image: infracost/infracost:latest
-    entrypoint: [""]
     script:
         - infracost breakdown --path=.
-        - infracost output --format=github-comment --path=infracost.json
     tags:
         - bookstack-runner
     # rules:
@@ -19,8 +17,6 @@ deploy-infra:
     stage: deploy
     image: hashicorp/terraform:latest
     variables:
-        TF_HTTP_USERNAME: ""  # À définir ici aussi
-        TF_HTTP_PASSWORD: ""  # ou au niveau global
         TF_IN_AUTOMATION: "true"  # Indique à Terraform qu'il tourne en CI
     script:
         - terraform init 
