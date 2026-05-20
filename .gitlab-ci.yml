@@ -9,9 +9,9 @@ deploy-infracost:
         - infracost breakdown --path=.
     tags:
         - bookstack-runner
-    rules:
-        - if: $CI_COMMIT_BRANCH == "main"
-          when: always
+    # rules:
+    #     - if: $CI_COMMIT_BRANCH == "main"
+    #       when: always
 
 deploy-infra:
     stage: deploy
@@ -28,7 +28,7 @@ deploy-infra:
         # - terraform apply -lock=false -auto-approve
     tags:
         - bookstack-runner
-    rules:
-        - if: $CI_COMMIT_BRANCH == "main"
-          when: always
+    # rules:
+    #     - if: $CI_COMMIT_BRANCH == "main"
+    #       when: always
 
