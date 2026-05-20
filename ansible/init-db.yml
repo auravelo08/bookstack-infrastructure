@@ -1,0 +1,26 @@
+---
+- name: Création des bases PostgreSQL sur RDS
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  vars:
+      db_host: "shared-bookstack-keycloak-rds.crogwcggglt8.eu-north-1.rds.amazonaws.com"
+      db_user: "dbadmin"
+      db_password: "{{ lookup('env', 'RDS_PASSWORD') }}"
+      db_port: 5432
+
+  tasks:
+      - name: Création des bases PostgreSQL
+        community.postgresql.postgresql_db:
+            name: "{{ item }}"
+            login_host: "{{ db_host }}"
+            login_user: "{{ db_user }}"
+            login_password: "{{ db_password }}"
+            login_port: "{{ db_port }}"
+            state: present
+        loop:
+            - keycloak_prod
+            - bookstack_prod
+            - keycloak_staging
+            - bookstack_staging
