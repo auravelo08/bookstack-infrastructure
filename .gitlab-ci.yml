@@ -23,6 +23,8 @@ deploy-infra:
     TF_IN_AUTOMATION: "true"
     
   script:
+    - echo $TF_HTTP_USERNAME
+    - echo $TF_HTTP_PASSWORD
     - terraform init
     - terraform fmt -check
     - terraform validate
