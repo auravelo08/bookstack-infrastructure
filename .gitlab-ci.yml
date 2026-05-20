@@ -5,26 +5,11 @@ stages:
 # 1. Job d'analyse des coûts (Infracost)
 infracost-check:
   stage: infracost
-  image: alpine:latest
+  image:  infracost/infracost:ci-0.10
   variables:
     INFRACOST_API_KEY: $INFRACOST_API_KEY
   script:
-    # 1. Installer curl et tar (nécessaire pour extraire le .tar.gz)
-    - apk add --no-cache curl tar
-    # 2. Télécharger directement le binaire pré-compilé (version stable récente)
-    # Note: On utilise une URL directe vers le release asset
-    - curl -sL https://github.com/infracost/infracost/releases/download/v0.10.44/infracost-linux-amd64.tar.gz -o infracost.tar.gz
-    # 3. Extraire l'archive
-    - tar -xzf infracost.tar.gz
-    # 4. Rendre le binaire exécutable
-    - chmod +x infracost-linux-amd64
-    # 5. Exécuter l'analyse
-    - ./infracost-linux-amd64 breakdown --path=. --format json --out-file infracost-output.json
-    - ./infracost-linux-amd64 format --path infracost-output.json
-  artifacts:
-    paths:
-      - infracost-output.json
-    expire_in: 1 week
+    - infracost breakdown --path=.
   tags:
     - bookstack-runner
 # 2. Job de déploiement (Terraform)
@@ -38,7 +23,6 @@ deploy-infra:
     - terraform fmt
     - terraform validate
     - terraform plan -lock=false
-    # Décommentez la ligne ci-dessous pour activer le déploiement réel
     # - terraform apply -lock=false -auto-approve
   tags:
     - bookstack-runner
