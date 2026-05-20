@@ -5,7 +5,7 @@ stages:
 deploy-infracost:
     stage: infracost
     image: infracost/infracost:latest
-    entrypoint: [""] # Permet d'exécuter les commandes directement sans passer par l'entrée par défaut de l'image
+    entrypoint: ["/bin/sh", "-c"] # Permet d'exécuter les commandes directement sans passer par l'entrée par défaut de l'image
     script:
         - infracost breakdown --path=.
     tags:
