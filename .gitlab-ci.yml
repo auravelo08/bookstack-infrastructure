@@ -10,7 +10,9 @@ deploy-infracost:
     script:
         - apk add --no-cache curl unzip
         - curl -sSL https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.sh | sh
-        - infracost breakdown --path=.
+        - tar -xzf infracost.tar.gz
+        - chmod +x infracost-linux-amd64
+        - ./infracost-linux-amd64 breakdown --path=.
     tags:
         - bookstack-runner
     # rules:
