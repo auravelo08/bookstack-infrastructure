@@ -18,7 +18,7 @@ stages:
 
 deploy-infrastructure:
   stage: deploy
-  image: hashicorp/terraform:latest
+  image: hashicorp/terraform:1.9.0
   script:
     - terraform init 
     - terraform fmt -check
