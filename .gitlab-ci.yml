@@ -1,10 +1,6 @@
 stages:
-    - deploy
     - infracost
-variables:
-        TF_HTTP_USERNAME: ""  # À définir ici aussi
-        TF_HTTP_PASSWORD: ""  # ou au niveau global
-        TF_IN_AUTOMATION: "true"  # Indique à Terraform qu'il tourne en CI
+    - deploy
 
 deploy-infracost:
     stage: infracost
@@ -16,9 +12,14 @@ deploy-infracost:
     rules:
         - if: $CI_COMMIT_BRANCH == "main"
           when: always
+
 deploy-infra:
     stage: deploy
     image: hashicorp/terraform:latest
+    variables:
+        TF_HTTP_USERNAME: ""  # À définir ici aussi
+        TF_HTTP_PASSWORD: ""  # ou au niveau global
+        TF_IN_AUTOMATION: "true"  # Indique à Terraform qu'il tourne en CI
     script:
         - terraform init 
         - terraform fmt 
