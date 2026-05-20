@@ -1,6 +1,6 @@
 stages:
   - infracost
-  # - deploy
+  - deploy
 infracost-breakdown:
   stage: infracost
   image:
