@@ -1,22 +1,24 @@
 stages:
-  - infracost
+  # - infracost
   - deploy
-infracost-breakdown:
-  stage: infracost
-  image:
-    name: infracost/infracost:ci-0.10
-    entrypoint: [""]
-  script:
-    - echo $INFRACOST_API_KEY
-    - infracost breakdown --path=. --format=json --out-file=infracost.json
-  tags:
-    - bookstack-runner
+# infracost-breakdown:
+#   stage: infracost
+#   image:
+#     name: infracost/infracost:ci-0.10
+#     entrypoint: [""]
+#   script:
+#     - echo $INFRACOST_API_KEY
+#     - infracost breakdown --path=. --format=json --out-file=infracost.json
+#   tags:
+#     - bookstack-runner
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == "main"
 
 deploy-infra:
   stage: deploy
-  image: hashicorp/terraform:latest
+  image: 
+    name: hashicorp/terraform:latest
+    entrypoint: [""]
   variables:
     TF_IN_AUTOMATION: "true"
   script:
