@@ -6,22 +6,10 @@ infracost-breakdown:
   image:
     name: infracost/infracost:ci-0.10
     entrypoint: [""]
-  variables:
-    INFRACOST_API_KEY: $INFRACOST_API_KEY
-  before_script:
-  - export TF_HTTP_USERNAME=$CI_PROJECT_ID
-  - export TF_HTTP_PASSWORD=$TERRAFORM_TOKEN
-
+    
   script:
     - echo $INFRACOST_API_KEY
     - infracost breakdown --path=. --format=json --out-file=infracost.json
-    - infracost output --path=infracost.json --format=table
-  
-  artifacts:
-    paths:
-      - infracost.json
-    expire_in: 1 week
-
   tags:
     - bs-runner-2
 #   rules:
@@ -29,18 +17,7 @@ infracost-breakdown:
 
 deploy-infra:
   stage: deploy
-  # image ignorée car runner shell
-  id_tokens:
-    TERRAFORM_TOKEN:
-      aud: $CI_SERVER_URL
-  variables:
-    TF_IN_AUTOMATION: "true"
-    TF_HTTP_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/bastion"
-    TF_HTTP_USERNAME: "$CI_PROJECT_ID"
-    TF_HTTP_PASSWORD: "$TERRAFORM_TOKEN"
-  before_script:
-    - echo "Terraform path: $(which terraform)"
-    - terraform version
+  image: hashicorp/terraform:latest
   script:
     - terraform init -input=false
     - terraform fmt -check
