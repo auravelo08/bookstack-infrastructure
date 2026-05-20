@@ -5,6 +5,8 @@ stages:
 deploy-infracost:
     stage: infracost
     image: alpine:latest
+    variables:
+        INFRACOST_API_KEY: $INFRACOST_API_KEY
     script:
         - apk add --no-cache curl
         - curl -sSL https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.sh | sh
