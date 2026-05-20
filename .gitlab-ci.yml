@@ -1,31 +1,35 @@
 stages:
   - infracost
-  - deploy
+  # - deploy
 
-infracost-check:
+variables:
+  INFRACOST_API_KEY: $INFRACOST_API_KEY
+
+infracost-breakdown:
   stage: infracost
-  image:  infracost/infracost:ci-0.10
-  variables:
-    INFRACOST_API_KEY: $INFRACOST_API_KEY
+  image: infracost/infracost:ci-0.10
   script:
-    - infracost breakdown --path=.
+    - infracost breakdown --path=. --format=json --out-file=infracost.json
+    - infracost diff --path=. --compare-to=main --format=json --out-file=infracost_diff.json
+    # - infracost comment gitlab --path=infracost_diff.json --behavior=update
+    - infracost diff --path=. --compare-to=main --threshold-percent=10
+  # rules:
+  #   - if: $CI_MERGE_REQUEST_IID
   tags:
     - bookstack-runner
-#   rules:
-#     - if: $CI_COMMIT_BRANCH == "main"
-#
-deploy-infra:
-  stage: deploy
-  image: hashicorp/terraform:latest
-  variables:
-    TF_IN_AUTOMATION: "true"
-  script:
-    - terraform init
-    - terraform fmt -check
-    - terraform validate
-    - terraform plan -lock=false
-    # - terraform apply -lock=false -auto-approve
-  tags:
-    - bookstack-runner
-#   rules:
-#     - if: $CI_COMMIT_BRANCH == "main"
+
+# deploy-infra:
+#   stage: deploy
+#   image: hashicorp/terraform:latest
+#   variables:
+#     TF_IN_AUTOMATION: "true"
+#   script:
+#     - terraform init
+#     - terraform fmt -check
+#     - terraform validate
+#     - terraform plan -lock=false
+#     # - terraform apply -lock=false -auto-approve
+#   tags:
+#     - bookstack-runner
+# #   rules:
+# #     - if: $CI_COMMIT_BRANCH == "main"
