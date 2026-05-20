@@ -8,6 +8,10 @@ infracost-breakdown:
     entrypoint: [""]
   variables:
     INFRACOST_API_KEY: $INFRACOST_API_KEY
+  before_script:
+  - export TF_HTTP_USERNAME=$CI_PROJECT_ID
+  - export TF_HTTP_PASSWORD=$TERRAFORM_TOKEN
+
   script:
     - echo $INFRACOST_API_KEY
     - infracost breakdown --path=. --format=json --out-file=infracost.json
@@ -17,7 +21,7 @@ infracost-breakdown:
     paths:
       - infracost.json
     expire_in: 1 week
-    
+
   tags:
     - bs-runner-2
 #   rules:
