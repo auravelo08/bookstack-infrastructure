@@ -1,6 +1,6 @@
 stages:
-    - infracost
     - deploy
+    - infracost
 variables:
         TF_HTTP_USERNAME: ""  # À définir ici aussi
         TF_HTTP_PASSWORD: ""  # ou au niveau global
@@ -18,9 +18,10 @@ deploy-infracost:
           when: always
 deploy-infra:
     stage: deploy
+    image: hashicorp/terraform:latest
     script:
         - terraform init 
-        - terraform fmt -check
+        - terraform fmt 
         - terraform validate
         - terraform plan -lock=false
         # - terraform apply -lock=false -auto-approve
