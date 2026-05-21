@@ -5,7 +5,6 @@ stages:
 infracost-breakdown:
   stage: infracost
   script:
-    # La commande est maintenant directe car le binaire est dans /usr/local/bin
     - infracost breakdown --path=. --format=json --out-file=infracost.json
     - infracost output --path infracost.json --format table
   tags:
