@@ -5,10 +5,11 @@ stages:
 infracost-breakdown:
   stage: infracost
   image: 
-    name: infracost/infracost:latest # Utilise l'image officielle Infracost
-    entrypoint: [""] # Permet d'exécuter les commandes Infracost directement
+    name: infracost/infracost:latest
+    entrypoint: [""]
   script:
-    - infracost breakdown --path=. --format=json --out-file=infracost.json
+    # On s'assure de ne pas scanner les dossiers cachés inutiles si possible
+    - infracost breakdown --path=. --format=json --out-file=infracost.json --exclude-path .terraform
     - infracost output --path infracost.json --format table
   tags:
     - bs-runner-3
