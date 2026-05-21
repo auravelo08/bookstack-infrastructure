@@ -18,10 +18,20 @@ deploy-infrastructure:
     - echo $TF_HTTP_USERNAME
     - echo $TF_HTTP_PASSWORD
   script:
-    - terraform init 
-    - terraform fmt -check
-    - terraform validate
-    - terraform plan -lock=false -input=false
+    - |
+      docker run --rm \
+        -v $(pwd):/src -w /src \
+        --network host \
+        -e TF_VAR_dev_ips="$TF_VAR_dev_ips" \
+        -e TF_VAR_keypair_name="$TF_VAR_keypair_name" \
+        -e TF_VAR_ami_id="$TF_VAR_ami_id" \
+        -e AWS_DEFAULT_REGION="eu-north-1" \
+        $IMAGE_TERRAFORM /bin/sh -c "
+          terraform init && \
+          terraform fmt -check && \
+          terraform validate && \
+          terraform plan -lock=false -input=false
+        "
     # - terraform apply -auto-approve -lock=false
   tags:
     - bs-runner-2
