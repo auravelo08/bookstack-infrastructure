@@ -12,6 +12,15 @@ resource "aws_security_group" "swarm_nodes" {
     security_groups = [aws_security_group.bastion_sg.id]
   }
 
+  ingress {
+    description = "Allow SSH from Gitlab Runner"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    # On autorise le Security Group du Runner directement
+    security_groups = [aws_security_group.gitlab_runner_sg.id]
+  }
+
   # Swarm manager
   ingress {
     from_port = 2377
@@ -41,6 +50,23 @@ resource "aws_security_group" "swarm_nodes" {
     to_port   = 4789
     protocol  = "udp"
     self      = true
+  }
+
+  ingress {
+    description     = "Access to BookStack App"
+    from_port       = 6875
+    to_port         = 6875
+    protocol        = "tcp"
+    security_groups = [aws_security_group.bastion_sg.id]
+  }
+
+  # Autoriser l'ALB à communiquer avec les nœuds sur le port de BookStack
+  ingress {
+    description     = "Traffic from ALB"
+    from_port       = 6875
+    to_port         = 6875
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id] # Référence au SG du futur ALB
   }
 
   # Sortie Internet via NAT
