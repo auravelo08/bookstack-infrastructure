@@ -26,6 +26,7 @@ deploy-infrastructure:
   before_script:
     - cd ${TF_ROOT}
   script:
+    - gitlab-terraform init
     - gitlab-terraform fmt -check
     - gitlab-terraform validate
     - gitlab-terraform plan
