@@ -102,3 +102,35 @@
         --token "{{ gitlab_registration_token }}"
         --executor "shell"
         --description "Runner pour Bookstack"
+
+    - name: Nettoyer la clé HashiCorp mal formatée (si présente)
+      ansible.builtin.file:
+        path: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+        state: absent
+
+    - name: Télécharger et convertir la clé GPG HashiCorp (Format Binaire)
+      ansible.builtin.shell: |
+        curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+    - name: Configurer le dépôt Terraform (Stable sur Jammy)
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com jammy main"
+        filename: hashicorp
+        state: present
+
+    - name: Installer Terraform uniquement
+      ansible.builtin.apt:
+        name: terraform
+        state: present
+        update_cache: yes
+
+    - name: Vérifier l'installation
+      ansible.builtin.command: terraform version
+      register: tf_version
+      changed_when: false
+
+    - name: Afficher la version
+      ansible.builtin.debug:
+        msg: "{{ tf_version.stdout }}"
