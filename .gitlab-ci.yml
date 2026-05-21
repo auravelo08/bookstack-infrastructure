@@ -4,7 +4,9 @@ stages:
 
 infracost-breakdown:
   stage: infracost
-  image: infracost/infracost:latest # Utilise l'image officielle Infracost
+  image: 
+    name: infracost/infracost:latest # Utilise l'image officielle Infracost
+    entrypoint: [""] # Permet d'exécuter les commandes Infracost directement
   variables:
     INFRACOST_API_KEY: $INFRACOST_API_KEY # Assurez-vous qu'elle est dans GitLab
   script:
@@ -17,7 +19,9 @@ infracost-breakdown:
 
 deploy-infrastructure:
   stage: deploy
-  image: hashicorp/terraform:1.7 # GitLab lance le conteneur automatiquement
+  image:
+    name: hashicorp/terraform:1.7
+    entrypoint: [""] # GitLab lance le conteneur automatiquement
   script:
     - terraform init
     - terraform fmt -check
