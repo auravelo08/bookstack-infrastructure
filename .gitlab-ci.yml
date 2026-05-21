@@ -7,8 +7,6 @@ infracost-breakdown:
   image: 
     name: infracost/infracost:latest # Utilise l'image officielle Infracost
     entrypoint: [""] # Permet d'exécuter les commandes Infracost directement
-  variables:
-    INFRACOST_API_KEY: $INFRACOST_API_KEY # Assurez-vous qu'elle est dans GitLab
   script:
     - infracost breakdown --path=. --format=json --out-file=infracost.json
     - infracost output --path infracost.json --format table
