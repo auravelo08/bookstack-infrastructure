@@ -8,7 +8,7 @@ resource "aws_security_group" "gitlab_runner_sg" {
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    security_groups = ["sg-013b500e2824b95ba"]
+    security_groups = [aws_security_group.bastion_sg.id]
   }
 
   egress {
@@ -56,10 +56,13 @@ resource "aws_instance" "gitlab_runner" {
   vpc_security_group_ids = [aws_security_group.gitlab_runner_sg.id]
   key_name               = "bs-caps-project"
 
-
   associate_public_ip_address = false
+  iam_instance_profile        = aws_iam_instance_profile.gitlab_runner_profile.name
 
-  iam_instance_profile = aws_iam_instance_profile.gitlab_runner_profile.name
+  root_block_device {
+    volume_size = 30 # ← mets 30 ou 50 Go selon tes builds
+    volume_type = "gp3"
+  }
 
   tags = {
     Name        = "gitlab-runner"

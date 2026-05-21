@@ -1,0 +1,40 @@
+---
+- name: Générer la configuration SSH pour l'équipe
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+      - name: Créer un bloc de configuration SSH local
+        ansible.builtin.blockinfile:
+            path: "{{ lookup('env', 'HOME') }}/.ssh/config"
+            create: yes
+            mode: "0600"
+            marker: "# {mark} CONFIGURATION PROJET BOOKSTACK"
+            block: |
+                PubkeyAcceptedKeyTypes=+ssh-rsa
+
+                Host bastion
+                    HostName {{ hostvars['bastion']['ansible_host'] }}
+                    Port {{ hostvars['bastion']['ansible_port'] | default(22) }}
+                    User {{ hostvars['bastion']['ansible_user'] }}
+                    IdentityFile ~/.ssh/bs-caps-project.pem
+
+                Host swarm-master swarm-worker-1 swarm-worker-2 gitlab-runner
+                    User ubuntu
+                    IdentityFile ~/.ssh/bs-caps-project.pem
+                    ProxyJump bastion
+                    StrictHostKeyChecking no
+                    UserKnownHostsFile /dev/null
+
+                Host swarm-master
+                    HostName {{ hostvars['swarm-master']['ansible_host'] }}
+
+                Host swarm-worker-1
+                    HostName {{ hostvars['swarm-worker-1']['ansible_host'] }}
+
+                Host swarm-worker-2
+                    HostName {{ hostvars['swarm-worker-2']['ansible_host'] }}
+
+                Host gitlab-runner
+                    HostName {{ hostvars['gitlab-runner']['ansible_host'] }}

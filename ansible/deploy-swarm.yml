@@ -1,6 +1,6 @@
 ---
 - name: Installer Docker sur les nœuds du Swarm
-  hosts: swarm_master, swarm_worker_1, swarm_worker_2
+  hosts: swarm-master, swarm-worker-1, swarm-worker-2
   become: true
   tasks:
     - name: Installer les prérequis pour Docker
@@ -42,6 +42,13 @@
         state: present
         update_cache: true
 
+    - name: Installer psycopg2 pour les modules PostgreSQL
+      apt:
+        name:
+          - python3-psycopg2
+        state: present
+        update_cache: true
+
     - name: Démarrer et activer le service Docker
       systemd:
         name: docker
@@ -58,13 +65,12 @@
       meta: reset_connection
 
 - name: Initialiser le Swarm sur le Master
-  hosts: swarm_master
+  hosts: swarm-master
   become: true
   tasks:
     - name: Initialiser le Docker Swarm
       command: "docker swarm init --advertise-addr {{ ansible_host }}"
       register: swarm_init_result
-      # On assouplit la condition pour accepter le fait qu'il soit déjà dans un swarm
       failed_when:
         - swarm_init_result.rc != 0
         - "'already part of a swarm' not in swarm_init_result.stderr"
@@ -81,7 +87,7 @@
         manager_ip: "{{ ansible_host }}"
 
 - name: Rejoindre le Swarm en tant que Worker
-  hosts: swarm_worker_1, swarm_worker_2
+  hosts: swarm-worker-1, swarm-worker-2
   become: true
   tasks:
     - name: Rejoindre le cluster Swarm

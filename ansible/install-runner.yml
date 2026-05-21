@@ -1,6 +1,8 @@
 ---
 - name: Installation de GitLab Runner sur l'instance privee
-  hosts: gitlab_runner # Cible uniquement cette machine de votre inventaire
+  hosts: gitlab-runner # Cible uniquement cette machine de votre inventaire
+  vars_files:
+    - vars-secrets.yml
   become: yes # S'exécute en mode sudo (root)
 
   tasks:
@@ -78,9 +80,19 @@
 
     - name: Ajouter l'utilisateur gitlab-runner au groupe docker
       ansible.builtin.user:
-        name: gitlab-runner
+        name: ubuntu
         groups: docker
         append: yes
+
+    - name: Redémarrer gitlab-runner pour appliquer les nouveaux groupes
+      ansible.builtin.systemd:
+        name: gitlab-runner
+        state: restarted
+
+    - name: Supprimer l'ancien fichier de configuration GitLab Runner
+      ansible.builtin.file:
+        path: /etc/gitlab-runner/config.toml
+        state: absent
 
     - name: Enregistrer le GitLab Runner auprès de l'instance GitLab
       ansible.builtin.command: >
@@ -88,6 +100,5 @@
         --non-interactive
         --url "https://gitlab.com"
         --token "{{ gitlab_registration_token }}"
-        --executor "docker"
-        --docker-image ubuntu:latest
+        --executor "shell"
         --description "Runner pour Bookstack"

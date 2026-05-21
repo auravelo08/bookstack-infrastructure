@@ -5,7 +5,7 @@
   vars:
     ssh_port: 2026
     allowed_user: bastion
-    source_public_key: "/home/engineer/.ssh/bs-caps-project.pub" # À ajuster selon votre environnement
+    source_public_key: "~/.ssh/bs-caps-project.pub" # À ajuster selon votre environnement
 
   tasks:
     - name: Test connection
