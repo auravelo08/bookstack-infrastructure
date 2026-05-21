@@ -8,7 +8,7 @@ infracost-breakdown:
     - infracost breakdown --path=. --format=json --out-file=infracost.json
     - infracost output --path infracost.json --format table
   tags:
-    - bs-runner-2
+    - bs-runner-3
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == "main"
 
@@ -36,6 +36,6 @@ deploy-infrastructure:
         "
     # - terraform apply -auto-approve -lock=false
   tags:
-    - bs-runner-2
+    - bs-runner-3
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == "main"
