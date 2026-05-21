@@ -19,12 +19,16 @@ stages:
 deploy-infrastructure:
   stage: deploy
   image: registry.gitlab.com/gitlab-org/terraform-images/stable:latest
-  script:
-    - gitlab-terraform init
   cache:
-    key: "${TF_STATE}"
+    key: "${TF_STATE_NAME}"
     paths:
       - ${TF_ROOT}/.terraform
+  before_script:
+    - cd ${TF_ROOT}
+  script:
+    - gitlab-terraform fmt -check
+    - gitlab-terraform validate
+    - gitlab-terraform plan
   # image: hashicorp/terraform:1.9.0
   # variables:
   #   TF_IN_AUTOMATION: "true"
