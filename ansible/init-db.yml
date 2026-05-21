@@ -1,26 +1,41 @@
 ---
-- name: Création des bases PostgreSQL sur RDS
+- name: Création des bases PostgreSQL via tunnel SSH
   hosts: localhost
-  gather_facts: false
   connection: local
+  gather_facts: false
 
   vars:
-      db_host: "shared-bookstack-keycloak-rds.crogwcggglt8.eu-north-1.rds.amazonaws.com"
+      rds_host: "shared-bookstack-keycloak-rds.crogwcggglt8.eu-north-1.rds.amazonaws.com"
+      rds_port: 5432
+      local_port: 5433
+
       db_user: "dbadmin"
       db_password: "{{ lookup('env', 'RDS_PASSWORD') }}"
-      db_port: 5432
+
+      databases:
+          - keycloak_prod
+          - keycloak_staging
+          - bookstack_prod
+          - bookstack_staging
 
   tasks:
-      - name: Création des bases PostgreSQL
-        community.postgresql.postgresql_db:
-            name: "{{ item }}"
-            login_host: "{{ db_host }}"
-            login_user: "{{ db_user }}"
-            login_password: "{{ db_password }}"
-            login_port: "{{ db_port }}"
-            state: present
-        loop:
-            - keycloak_prod
-            - bookstack_prod
-            - keycloak_staging
-            - bookstack_staging
+      - name: Ouvrir un tunnel SSH via swarm-master (ProxyJump bastion)
+        command: >
+            ssh -f -N
+            -L {{ local_port }}:{{ rds_host }}:{{ rds_port }}
+            swarm-master
+        async: 10
+        poll: 0
+
+      - name: Attendre que le tunnel soit ouvert
+        wait_for:
+            host: "localhost"
+            port: "{{ local_port }}"
+            timeout: 10
+
+      - name: Créer les bases PostgreSQL via psql
+        command: >
+            psql "host=localhost port={{ local_port }} user={{ db_user }} password={{ db_password }} sslmode=require"
+            -c "CREATE DATABASE {{ item }};"
+        loop: "{{ databases }}"
+        ignore_errors: true

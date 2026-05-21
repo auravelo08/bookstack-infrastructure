@@ -1,3 +1,12 @@
+provider "postgresql" {
+  host            = aws_db_instance.shared_rds.address
+  port            = 5432
+  username        = "dbadmin"
+  password        = var.rds_master_password
+  sslmode         = "disable" # À adapter selon tes besoins SSL
+  connect_timeout = 15
+}
+
 ############################################
 # VPC
 ############################################

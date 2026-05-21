@@ -19,8 +19,8 @@ resource "aws_security_group" "bastion_sg" {
   dynamic "ingress" {
     for_each = var.dev_ips
     content {
-      from_port   = 2026
-      to_port     = 2026
+      from_port   = 22
+      to_port     = 22
       protocol    = "tcp"
       cidr_blocks = [ingress.value]
     }

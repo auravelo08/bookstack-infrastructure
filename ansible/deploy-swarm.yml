@@ -42,6 +42,13 @@
         state: present
         update_cache: true
 
+    - name: Installer psycopg2 pour les modules PostgreSQL
+      apt:
+        name:
+          - python3-psycopg2
+        state: present
+        update_cache: true
+
     - name: Démarrer et activer le service Docker
       systemd:
         name: docker
@@ -64,7 +71,6 @@
     - name: Initialiser le Docker Swarm
       command: "docker swarm init --advertise-addr {{ ansible_host }}"
       register: swarm_init_result
-      # On assouplit la condition pour accepter le fait qu'il soit déjà dans un swarm
       failed_when:
         - swarm_init_result.rc != 0
         - "'already part of a swarm' not in swarm_init_result.stderr"
