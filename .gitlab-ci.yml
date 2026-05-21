@@ -22,7 +22,7 @@ deploy-infrastructure:
     - terraform init 
     - terraform fmt -check
     - terraform validate
-    - terraform plan -lock=false 
+    - terraform plan -lock=false -input=false
     # - terraform apply -auto-approve -lock=false
   tags:
     - bs-runner-2
