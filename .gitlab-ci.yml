@@ -1,29 +1,34 @@
 # stages:
-#     - test
-#     - update-bastion
+  # - infracost
+#   - deploy
 
-# test:
-#     script:
-#         - echo "coucou runner"
-#     tags:
-#         - bookstack-runner
+# infracost-breakdown:
+#   stage: infracost
+#   image:
+#     name: infracost/infracost:ci-0.10
+#     entrypoint: [""]
+    
+#   script:
+#     - echo $INFRACOST_API_KEY
+#     - infracost breakdown --path=. --format=json --out-file=infracost.json
+#   tags:
+#     - bs-runner-2
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == "main"
 
-# gitlab-bastion:
-#     stage: update-bastion
-#     variables:
-#         TF_HTTP_USERNAME: ""  # À définir ici aussi
-#         TF_HTTP_PASSWORD: ""  # ou au niveau global
-#         TF_IN_AUTOMATION: "true"  # Indique à Terraform qu'il tourne en CI
-#     script:
-#         - terraform init 
-#         - terraform fmt 
-#         - terraform validate
-#         - terraform plan -lock=false
-#         - terraform apply -lock=false -auto-approve
-#     tags:
-#         - bookstack-runner
+# deploy-infrastructure:
+#   stage: deploy
+#   image: hashicorp/terraform:1.9.0
+#   before_script:
+#     - echo $TF_HTTP_USERNAME
+#     - echo $TF_HTTP_PASSWORD
+#   script:
+#     - terraform init 
+#     - terraform fmt -check
+#     - terraform validate
+#     - terraform plan -lock=false 
+#   tags:
+#     - bs-runner-2
 
-#     rules:
-#         - if: $CI_COMMIT_BRANCH == "main"
-#           when: always
-
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == "main"
