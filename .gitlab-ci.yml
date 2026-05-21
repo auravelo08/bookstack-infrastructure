@@ -18,17 +18,24 @@ stages:
 
 deploy-infrastructure:
   stage: deploy
-  image: hashicorp/terraform:1.9.0
-  variables:
-    TF_IN_AUTOMATION: "true"
-  before_script:
-    - echo $TF_HTTP_USERNAME
-    - echo $TF_HTTP_PASSWORD
+  image: registry.gitlab.com/gitlab-org/terraform-images/stable:latest
   script:
-    - terraform init 
-    - terraform fmt -check
-    - terraform validate
-    - terraform plan -lock=false 
+    - gitlab-terraform init
+  cache:
+    key: "${TF_STATE}"
+    paths:
+      - ${TF_ROOT}/.terraform
+  # image: hashicorp/terraform:1.9.0
+  # variables:
+  #   TF_IN_AUTOMATION: "true"
+  # before_script:
+  #   - echo $TF_HTTP_USERNAME
+  #   - echo $TF_HTTP_PASSWORD
+  # script:
+  #   - terraform init 
+  #   - terraform fmt -check
+  #   - terraform validate
+  #   - terraform plan -lock=false 
   tags:
     - bs-runner-2
 
