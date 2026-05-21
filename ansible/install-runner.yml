@@ -134,3 +134,18 @@
     - name: Afficher la version
       ansible.builtin.debug:
         msg: "{{ tf_version.stdout }}"
+
+    - name: Télécharger et installer Infracost
+      ansible.builtin.shell: |
+        curl -fsSL https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.sh | sh
+      args:
+        creates: /usr/local/bin/infracost
+
+    - name: Vérifier l'installation de Infracost
+      ansible.builtin.command: infracost --version
+      register: infracost_version
+      changed_when: false
+
+    - name: Afficher la version de Infracost
+      ansible.builtin.debug:
+        msg: "Infracost installé : {{ infracost_version.stdout }}"
