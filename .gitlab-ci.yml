@@ -23,12 +23,12 @@ deploy-infrastructure:
     entrypoint: [""]
   variables:
     AWS_DEFAULT_REGION: "eu-north-1"
-    TF_CLI_ARGS_init: "-get-plugins=true" # Force une gestion plus simple des plugins
+    # On supprime TF_CLI_ARGS_init car il peut causer des erreurs de syntaxe invisibles
   script:
-    - terraform init -input=false
+    - terraform init -input=false -no-color
     - terraform fmt -check
     - terraform validate
-    - terraform plan -lock=false -input=false
+    - terraform plan -input=false -lock=false -no-color
   tags:
     - bs-runner-3
 # deploy-infrastructure:
