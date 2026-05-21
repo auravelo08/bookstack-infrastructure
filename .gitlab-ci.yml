@@ -1,24 +1,20 @@
 stages:
-  # - infracost
+  - infracost
   - deploy
 
-# infracost-breakdown:
-#   stage: infracost
-#   image:
-#     name: infracost/infracost:ci-0.10
-#     entrypoint: [""]
-    
-#   script:
-#     - echo $INFRACOST_API_KEY
-#     - infracost breakdown --path=. --format=json --out-file=infracost.json
-#   tags:
-#     - bs-runner-2
+infracost-breakdown:
+  stage: infracost
+  script:
+    # La commande est maintenant directe car le binaire est dans /usr/local/bin
+    - infracost breakdown --path=. --format=json --out-file=infracost.json
+    - infracost output --path infracost.json --format table
+  tags:
+    - bs-runner-2
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == "main"
 
 deploy-infrastructure:
   stage: deploy
-  image: hashicorp/terraform:1.15
   before_script:
     - echo $TF_HTTP_USERNAME
     - echo $TF_HTTP_PASSWORD
@@ -27,8 +23,8 @@ deploy-infrastructure:
     - terraform fmt -check
     - terraform validate
     - terraform plan -lock=false 
+    # - terraform apply -auto-approve -lock=false
   tags:
     - bs-runner-2
-
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == "main"
