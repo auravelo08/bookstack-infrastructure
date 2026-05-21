@@ -4,6 +4,9 @@ stages:
 
 infracost-breakdown:
   stage: infracost
+  image: infracost/infracost:latest # Utilise l'image officielle Infracost
+  variables:
+    INFRACOST_API_KEY: $INFRACOST_API_KEY # Assurez-vous qu'elle est dans GitLab
   script:
     - infracost breakdown --path=. --format=json --out-file=infracost.json
     - infracost output --path infracost.json --format table
@@ -14,27 +17,17 @@ infracost-breakdown:
 
 deploy-infrastructure:
   stage: deploy
-  variables:
-    IMAGE_TERRAFORM: hashicorp/terraform:1.7
-  before_script:
-    - echo $TF_HTTP_USERNAME
-    - echo $TF_HTTP_PASSWORD
+  image: hashicorp/terraform:1.7 # GitLab lance le conteneur automatiquement
   script:
-    - |
-      docker run --rm \
-        -v $(pwd):/src -w /src \
-        --network host \
-        -e TF_VAR_dev_ips="$TF_VAR_dev_ips" \
-        -e TF_VAR_keypair_name="$TF_VAR_keypair_name" \
-        -e TF_VAR_ami_id="$TF_VAR_ami_id" \
-        -e AWS_DEFAULT_REGION="eu-north-1" \
-        $IMAGE_TERRAFORM /bin/sh -c "
-          terraform init && \
-          terraform fmt -check && \
-          terraform validate && \
-          terraform plan -lock=false -input=false
-        "
-    # - terraform apply -auto-approve -lock=false
+    - terraform init
+    - terraform fmt -check
+    - terraform validate
+    - terraform plan -lock=false -input=false
+  variables:
+    # On définit la région ici pour Terraform
+    AWS_DEFAULT_REGION: "eu-north-1"
+    # Note : Les variables TF_VAR_ configurées dans GitLab 
+    # sont injectées automatiquement dans le conteneur.
   tags:
     - bs-runner-3
 #   rules:
