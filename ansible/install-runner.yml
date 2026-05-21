@@ -1,9 +1,9 @@
 ---
 - name: Installation de GitLab Runner sur l'instance privee
-  hosts: gitlab-runner # Cible uniquement cette machine de votre inventaire
+  hosts: gitlab-runner
   vars_files:
     - vars-secrets.yml
-  become: yes # S'exécute en mode sudo (root)
+  become: yes
 
   tasks:
     - name: Télécharger le script d'installation du dépôt officiel GitLab
@@ -12,7 +12,7 @@
         dest: /tmp/script.deb.sh
         mode: "0744"
 
-    - name: Executer le script pour ajouter le dépôt APT
+    - name: Exécuter le script pour ajouter le dépôt APT
       ansible.builtin.command: /tmp/script.deb.sh
       environment:
         os: ubuntu
@@ -31,6 +31,10 @@
         name: gitlab-runner
         state: started
         enabled: yes
+
+    # -----------------------------
+    # INSTALLATION DOCKER
+    # -----------------------------
 
     - name: Installer les dépendances pour Docker
       ansible.builtin.apt:
@@ -55,7 +59,7 @@
         dest: /etc/apt/keyrings/docker.asc
         mode: "0644"
 
-    - name: Ajouter le dépôt APT officiel de Docker (Forcé sur Jammy pour stabilité)
+    - name: Ajouter le dépôt APT officiel de Docker
       ansible.builtin.apt_repository:
         repo: "deb [signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu jammy stable"
         filename: docker
@@ -78,23 +82,36 @@
         state: started
         enabled: yes
 
+    # -----------------------------
+    # FIX PERMISSIONS DOCKER
+    # -----------------------------
+
     - name: Ajouter l'utilisateur gitlab-runner au groupe docker
       ansible.builtin.user:
-        name: ubuntu
+        name: gitlab-runner
         groups: docker
         append: yes
+
+    - name: Redémarrer Docker
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted
 
     - name: Redémarrer gitlab-runner pour appliquer les nouveaux groupes
       ansible.builtin.systemd:
         name: gitlab-runner
         state: restarted
 
+    # -----------------------------
+    # CONFIGURATION DU RUNNER
+    # -----------------------------
+
     - name: Supprimer l'ancien fichier de configuration GitLab Runner
       ansible.builtin.file:
         path: /etc/gitlab-runner/config.toml
         state: absent
 
-    - name: Enregistrer le GitLab Runner auprès de l'instance GitLab
+    - name: Enregistrer le GitLab Runner auprès de GitLab
       ansible.builtin.command: >
         gitlab-runner register
         --non-interactive

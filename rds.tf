@@ -17,9 +17,9 @@ resource "aws_security_group" "rds_sg" {
 
   # Accès depuis le cluster Swarm de Production (celui de ton message initial)
   ingress {
-    description     = "PostgreSQL from Prod Swarm nodes"
-    from_port       = 5432
-    to_port         = 5432
+    description     = "MySQL/MariaDB from Prod Swarm nodes"
+    from_port       = 3306
+    to_port         = 3306
     protocol        = "tcp"
     security_groups = [aws_security_group.swarm_nodes.id]
   }
@@ -50,17 +50,22 @@ resource "aws_db_instance" "shared_rds" {
   identifier            = "shared-bookstack-keycloak-rds"
   allocated_storage     = 20
   max_allocated_storage = 50
-  engine                = "postgres"
-  engine_version        = "16"
-  instance_class        = "db.t3.micro"
+
+  # Changements ici :
+  engine         = "mariadb"
+  engine_version = "10.11" # Version stable actuelle de MariaDB
+  instance_class = "db.t3.micro"
 
   username = "dbadmin"
-  password = var.rds_master_password # Déclarée dans variables.tf
+  password = var.rds_master_password
 
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
-  publicly_accessible    = false
 
+  # Important pour MySQL/MariaDB
+  port = 3306
+
+  publicly_accessible = false
   multi_az            = false
   skip_final_snapshot = true
   deletion_protection = false
