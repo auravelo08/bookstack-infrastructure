@@ -20,18 +20,33 @@ deploy-infrastructure:
   stage: deploy
   image:
     name: hashicorp/terraform:1.7
-    entrypoint: [""] # GitLab lance le conteneur automatiquement
+    entrypoint: [""]
+  variables:
+    AWS_DEFAULT_REGION: "eu-north-1"
+    TF_CLI_ARGS_init: "-get-plugins=true" # Force une gestion plus simple des plugins
   script:
-    - terraform init
+    - terraform init -input=false
     - terraform fmt -check
     - terraform validate
     - terraform plan -lock=false -input=false
-  variables:
-    # On définit la région ici pour Terraform
-    AWS_DEFAULT_REGION: "eu-north-1"
-    # Note : Les variables TF_VAR_ configurées dans GitLab 
-    # sont injectées automatiquement dans le conteneur.
   tags:
     - bs-runner-3
+# deploy-infrastructure:
+#   stage: deploy
+#   image:
+#     name: hashicorp/terraform:1.7
+#     entrypoint: [""] # GitLab lance le conteneur automatiquement
+#   script:
+#     - terraform init
+#     - terraform fmt -check
+#     - terraform validate
+#     - terraform plan -lock=false -input=false
+#   variables:
+#     # On définit la région ici pour Terraform
+#     AWS_DEFAULT_REGION: "eu-north-1"
+#     # Note : Les variables TF_VAR_ configurées dans GitLab 
+#     # sont injectées automatiquement dans le conteneur.
+#   tags:
+#     - bs-runner-3
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == "main"
