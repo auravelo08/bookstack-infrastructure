@@ -8,7 +8,7 @@ resource "aws_security_group" "gitlab_runner_sg" {
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    security_groups = ["sg-013b500e2824b95ba"]
+    security_groups = [aws_security_group.bastion_sg.id]
   }
 
   egress {
