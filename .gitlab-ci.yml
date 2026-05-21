@@ -18,9 +18,7 @@ stages:
 
 deploy-infrastructure:
   stage: deploy
-  image: hashicorp/terraform:1.9.0
-  variables:
-    TF_IN_AUTOMATION: "true"
+  image: hashicorp/terraform:1.15
   before_script:
     - echo $TF_HTTP_USERNAME
     - echo $TF_HTTP_PASSWORD
