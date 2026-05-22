@@ -25,3 +25,11 @@ variable "rds_master_password" {
   description = "Le mot de passe administrateur (dbadmin) du RDS"
   sensitive   = true # Masque le mot de passe dans les logs de la console
 }
+
+variable "project" {
+  default = "bookstack"
+}
+
+variable "environment" {
+  default = "prod"
+}
