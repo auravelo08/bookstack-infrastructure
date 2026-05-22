@@ -51,7 +51,7 @@ resource "aws_iam_instance_profile" "gitlab_runner_profile" {
 
 resource "aws_instance" "gitlab_runner" {
   ami                    = var.ami_id
-  instance_type          = "t3.micro"
+  instance_type          = "t3.small"
   subnet_id              = aws_subnet.private[0].id
   vpc_security_group_ids = [aws_security_group.gitlab_runner_sg.id]
   key_name               = "bs-caps-project"

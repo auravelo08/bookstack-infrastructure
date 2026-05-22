@@ -94,8 +94,14 @@ resource "aws_instance" "swarm_nodes" {
   ]
 
   associate_public_ip_address = false
+  key_name                    = var.keypair_name
 
-  key_name = var.keypair_name
+  # 🔥 Ajout du disque EBS (20 Go recommandé)
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp3"
+    encrypted   = true
+  }
 
   tags = {
     Name = "swarm-node-${count.index + 1}"
