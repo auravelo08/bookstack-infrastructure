@@ -1,0 +1,17 @@
+- name: Create a DB cluster snapshot
+  amazon.aws.rds_cluster_snapshot:
+    db_cluster_identifier: "{{ cluster_id }}"
+    db_cluster_snapshot_identifier: new-cluster-snapshot
+
+- name: Delete a DB cluster snapshot
+  amazon.aws.rds_cluster_snapshot:
+    db_cluster_snapshot_identifier: new-cluster-snapshot
+    state: absent
+
+- name: Copy snapshot from a different region and copy its tags
+  amazon.aws.rds_cluster_snapshot:
+    id: new-database-snapshot-copy
+    region: us-east-1
+    source_id: "{{ snapshot.db_snapshot_arn }}"
+    source_region: us-east-2
+    copy_tags: true

@@ -1,0 +1,42 @@
+---
+- name: Configuration des snapshots automatiques RDS sur l'EC2
+  hosts: bdd-test
+  become: yes
+  tasks:
+
+    - name: Mise à jour du cache apt et installation des prérequis
+      apt:
+        name: unzip
+        state: present
+        update_cache: yes
+
+    - name: Télécharger et installer l'AWS CLI v2 (Nécessaire pour le script)
+      shell: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip -o awscliv2.zip
+        sudo ./aws/install --update
+      args:
+        creates: /usr/local/bin/aws
+
+    - name: Copier le script de snapshot sur l'instance EC2
+      copy:
+        src: ./backup_rds.sh
+        dest: /usr/local/bin/backup_rds.sh
+        mode: '0755' # Donne les droits d'exécution (rwxr-xr-x)
+        owner: root
+        group: root
+
+    - name: Créer le fichier de log avec les bonnes permissions
+      file:
+        path: /var/log/rds_snapshot.log
+        state: touch
+        mode: '0644'
+        owner: root
+        group: root
+
+    - name: Planifier la tâche Cron toutes les 10 minutes
+      cron:
+        name: "Snapshot RDS automatique toutes les 10 min"
+        minute: "*/10"
+        job: "/usr/local/bin/backup_rds.sh"
+        user: "root"

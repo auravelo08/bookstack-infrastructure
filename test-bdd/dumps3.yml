@@ -1,0 +1,77 @@
+---
+- name: Configuration des dumps S3 automatiques RDS sur l'EC2
+  hosts: bdd-test
+  become: yes
+  tasks:
+
+    # 1. On met d'abord le système de paquets à jour
+    - name: Mettre à jour le cache apt
+      apt:
+        update_cache: yes
+      register: apt_update_res
+      until: apt_update_res is success
+      retries: 5
+      delay: 10
+
+    # 2. On installe unzip TOUT SEUL pour être sûr qu'il soit dispo immédiatement
+    - name: Installer unzip (impératif pour décompresser l'AWS CLI)
+      apt:
+        name: unzip
+        state: present
+      register: unzip_res
+      until: unzip_res is success
+      retries: 5
+      delay: 5
+
+    # 3. On installe le client PostgreSQL
+    - name: Installer le client PostgreSQL
+      apt:
+        name: postgresql-client
+        state: present
+      register: psql_res
+      until: psql_res is success
+      retries: 5
+      delay: 5
+
+    # 4. On télécharge l'AWS CLI
+    - name: Télécharger l'installateur AWS CLI
+      get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /tmp/awscliv2.zip
+        mode: '0644'
+
+    # 5. Cette fois, unzip étant bien installé, cette tâche va fonctionner !
+    - name: Décompresser l'installateur AWS CLI
+      unarchive:
+        src: /tmp/awscliv2.zip
+        dest: /tmp
+        remote_src: yes
+
+    - name: Exécuter l'installateur AWS CLI
+      command: /tmp/aws/install --update
+      args:
+        creates: /usr/local/bin/aws
+
+    - name: Transfert du script de dump sur l'EC2
+      copy:
+        src: ./dump_rds_to_s3.sh
+        dest: /usr/local/bin/dump_rds_to_s3.sh
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Initialisation du fichier de log pour le dump
+      file:
+        path: /var/log/rds_dump.log
+        state: touch
+        mode: '0644'
+        owner: root
+        group: root
+
+    - name: Planification du dump via Cron (Tous les jours à minuit)
+      cron:
+        name: "Dump automatique RDS vers S3"
+        minute: "0"
+        hour: "0"
+        job: "/usr/local/bin/dump_rds_to_s3.sh"
+        user: "root"

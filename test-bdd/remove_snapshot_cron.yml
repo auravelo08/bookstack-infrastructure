@@ -1,0 +1,15 @@
+---
+- name: Suppression de la tâche de snapshot automatique
+  hosts: all
+  become: yes
+  tasks:
+
+    - name: Supprimer la tâche Cron du snapshot
+      cron:
+        name: "Configuration des snapshots automatiques RDS sur l'EC2" # ⚠️ Doit être le NOM EXACT utilisé dans le playbook précédent
+        state: absent # C'est ce mot-clé qui demande la suppression
+
+    - name: Supprimer le script Bash (Optionnel - pour nettoyer le disque)
+      file:
+        path: /usr/local/bin/backup_rds.sh
+        state: absent
