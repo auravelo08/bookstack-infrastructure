@@ -4,6 +4,7 @@ default:
 
 stages:
   - infracost
+  - approval
   - deploy
 
 infracost-breakdown:
@@ -13,6 +14,18 @@ infracost-breakdown:
     entrypoint: [""]
   script:
     - infracost breakdown --path=. --format=json --out-file=infracost.json
+    - infracost breakdown --path=. --format=table
+  artifacts:
+    paths:
+      - infracost.json
+    expire_in: 1 week
+
+cost-approval:
+  stage: approval
+  script:
+    - echo "Le coût a été analysé. Veuillez vérifier les logs du job 'infracost-breakdown' avant d'approuver."
+  when: manual
+  allow_failure: false
   # rules:
   #   - if: $CI_COMMIT_BRANCH == "main"
 
