@@ -1,3 +1,7 @@
+default:
+  tags:
+    - bs-runner-3
+
 stages:
   - infracost
   - deploy
@@ -11,8 +15,6 @@ infracost-breakdown:
   script:
     - echo $INFRACOST_API_KEY
     - infracost breakdown --path=. --format=json --out-file=infracost.json
-  tags:
-    - bs-runner-2
   # rules:
   #   - if: $CI_COMMIT_BRANCH == "main"
 
@@ -27,8 +29,6 @@ deploy-infrastructure:
     - terraform fmt -check
     - terraform validate
     - terraform plan -lock=false
-  tags:
-    - bs-runner-2
 
   # rules:
   #   - if: $CI_COMMIT_BRANCH == "main"
