@@ -69,6 +69,33 @@ resource "aws_security_group" "swarm_nodes" {
     security_groups = [aws_security_group.alb_sg.id] # Référence au SG du futur ALB
   }
 
+  # Autoriser l'ALB à communiquer avec Prometheus
+  ingress {
+    description     = "Traffic from ALB to Prometheus"
+    from_port       = 9090
+    to_port         = 9090
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id]
+  }
+
+  # Autoriser l'ALB à communiquer avec Grafana
+  ingress {
+    description     = "Traffic from ALB to Grafana"
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id]
+  }
+
+  # Autoriser l'ALB (ou le Manager) à collecter les métriques Node Exporter
+  ingress {
+    description     = "Traffic from ALB/Manager to Node Exporter"
+    from_port       = 9100
+    to_port         = 9100
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id] # Ou le SG du Manager si besoin
+  }
+
   # Sortie Internet via NAT
   egress {
     from_port   = 0
