@@ -1,34 +1,43 @@
-# stages:
-  # - infracost
-#   - deploy
+default:
+  tags:
+    - bs-runner-3
 
-# infracost-breakdown:
-#   stage: infracost
-#   image:
-#     name: infracost/infracost:ci-0.10
-#     entrypoint: [""]
-    
-#   script:
-#     - echo $INFRACOST_API_KEY
-#     - infracost breakdown --path=. --format=json --out-file=infracost.json
-#   tags:
-#     - bs-runner-2
-#   rules:
-#     - if: $CI_COMMIT_BRANCH == "main"
+stages:
+  - infracost
+  - approval
+  - deploy
 
-# deploy-infrastructure:
-#   stage: deploy
-#   image: hashicorp/terraform:1.9.0
-#   before_script:
-#     - echo $TF_HTTP_USERNAME
-#     - echo $TF_HTTP_PASSWORD
-#   script:
-#     - terraform init 
-#     - terraform fmt -check
-#     - terraform validate
-#     - terraform plan -lock=false 
-#   tags:
-#     - bs-runner-2
+infracost-breakdown:
+  stage: infracost
+  image:
+    name: infracost/infracost:ci-0.10
+    entrypoint: [""]
+  script:
+    - infracost breakdown --path=. --format=json --out-file=infracost.json
+    - infracost breakdown --path=. --format=table
+  artifacts:
+    paths:
+      - infracost.json
+    expire_in: 1 week
 
-#   rules:
-#     - if: $CI_COMMIT_BRANCH == "main"
+cost-approval:
+  stage: approval
+  script:
+    - echo "Le coût a été analysé. Veuillez vérifier les logs du job 'infracost-breakdown' avant d'approuver."
+  when: manual
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+deploy-infrastructure:
+  stage: deploy
+  image:
+    name: hashicorp/terraform:1.9.0
+    entrypoint: [""]
+  script:
+    - terraform init
+    - terraform fmt -check
+    - terraform validate
+    - terraform plan -lock=false
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"

@@ -71,3 +71,36 @@ resource "aws_instance" "gitlab_runner" {
     ManagedBy   = "Terraform"
   }
 }
+
+# 1. Création de la politique avec les droits nécessaires
+resource "aws_iam_policy" "gitlab_runner_policy" {
+  name        = "gitlab-runner-full-infra-policy"
+  description = "Permissions pour que le runner puisse déployer l'infra"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:*",
+          "s3:*",
+          "elasticloadbalancing:*",
+          "rds:*",
+          "iam:Get*",
+          "iam:List*",
+          "iam:PassRole",
+          "cloudfront:*",
+          "vpc:*"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# 2. Attachement au rôle existant
+resource "aws_iam_role_policy_attachment" "gitlab_runner_infra_access" {
+  role       = aws_iam_role.gitlab_runner_role.name
+  policy_arn = aws_iam_policy.gitlab_runner_policy.arn
+}
