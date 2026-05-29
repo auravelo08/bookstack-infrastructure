@@ -15,13 +15,15 @@ resource "aws_security_group" "rds_sg" {
   description = "Allow database traffic from Prod Swarm and Staging EC2"
   vpc_id      = aws_vpc.main.id
 
-  # Accès depuis le cluster Swarm de Production (celui de ton message initial)
   ingress {
-    description     = "MySQL/MariaDB from Prod Swarm nodes"
-    from_port       = 3306
-    to_port         = 3306
-    protocol        = "tcp"
-    security_groups = [aws_security_group.swarm_nodes.id]
+    description = "MySQL/MariaDB from Prod Swarm nodes and runner"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    security_groups = [
+      aws_security_group.swarm_nodes.id,
+      aws_security_group.gitlab_runner_sg.id
+    ]
   }
 
   #   # Accès depuis ton instance unique de Staging
