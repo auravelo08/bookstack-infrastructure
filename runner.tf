@@ -69,7 +69,6 @@ resource "aws_instance" "gitlab_runner" {
       ami,
       instance_type,
       user_data,
-      # Ajoutez ici tous les champs qui changent souvent
     ]
   }
 
