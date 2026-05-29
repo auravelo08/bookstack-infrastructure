@@ -31,7 +31,9 @@ cost-approval:
 
 deploy-infrastructure:
   stage: deploy
-  image: hashicorp/terraform:1.9.0
+  image:
+    name: hashicorp/terraform:1.9.0
+    entrypoint: [""]
   script:
     - terraform init
     - terraform fmt -check
