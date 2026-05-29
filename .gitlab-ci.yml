@@ -1,34 +1,34 @@
-# stages:
-  # - infracost
-#   - deploy
+stages:
+  - infracost
+  - deploy
 
-# infracost-breakdown:
-#   stage: infracost
-#   image:
-#     name: infracost/infracost:ci-0.10
-#     entrypoint: [""]
-    
-#   script:
-#     - echo $INFRACOST_API_KEY
-#     - infracost breakdown --path=. --format=json --out-file=infracost.json
-#   tags:
-#     - bs-runner-2
-#   rules:
-#     - if: $CI_COMMIT_BRANCH == "main"
+infracost-breakdown:
+  stage: infracost
+  image:
+    name: infracost/infracost:ci-0.10
+    entrypoint: [""]
 
-# deploy-infrastructure:
-#   stage: deploy
-#   image: hashicorp/terraform:1.9.0
-#   before_script:
-#     - echo $TF_HTTP_USERNAME
-#     - echo $TF_HTTP_PASSWORD
-#   script:
-#     - terraform init 
-#     - terraform fmt -check
-#     - terraform validate
-#     - terraform plan -lock=false 
-#   tags:
-#     - bs-runner-2
+  script:
+    - echo $INFRACOST_API_KEY
+    - infracost breakdown --path=. --format=json --out-file=infracost.json
+  tags:
+    - bs-runner-2
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
-#   rules:
-#     - if: $CI_COMMIT_BRANCH == "main"
+deploy-infrastructure:
+  stage: deploy
+  image: hashicorp/terraform:1.9.0
+  before_script:
+    - echo $TF_HTTP_USERNAME
+    - echo $TF_HTTP_PASSWORD
+  script:
+    - terraform init
+    - terraform fmt -check
+    - terraform validate
+    - terraform plan -lock=false
+  tags:
+    - bs-runner-2
+
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
