@@ -11,9 +11,7 @@ infracost-breakdown:
   image:
     name: infracost/infracost:ci-0.10
     entrypoint: [""]
-
   script:
-    - echo $INFRACOST_API_KEY
     - infracost breakdown --path=. --format=json --out-file=infracost.json
   # rules:
   #   - if: $CI_COMMIT_BRANCH == "main"
@@ -21,9 +19,6 @@ infracost-breakdown:
 deploy-infrastructure:
   stage: deploy
   image: hashicorp/terraform:1.9.0
-  before_script:
-    - echo $TF_HTTP_USERNAME
-    - echo $TF_HTTP_PASSWORD
   script:
     - terraform init
     - terraform fmt -check
