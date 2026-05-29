@@ -64,6 +64,14 @@ resource "aws_instance" "gitlab_runner" {
     volume_type = "gp3"
   }
 
+  lifecycle {
+    ignore_changes = [
+      ami,
+      instance_type,
+      user_data,
+    ]
+  }
+
   tags = {
     Name        = "gitlab-runner"
     Project     = "BookStack"
