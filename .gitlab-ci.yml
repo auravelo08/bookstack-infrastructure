@@ -13,8 +13,8 @@ infracost-breakdown:
     - infracost breakdown --path=. --format=json --out-file=infracost.json
   tags:
     - bs-runner-2
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+  # rules:
+  #   - if: $CI_COMMIT_BRANCH == "main"
 
 deploy-infrastructure:
   stage: deploy
@@ -30,5 +30,5 @@ deploy-infrastructure:
   tags:
     - bs-runner-2
 
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+  # rules:
+  #   - if: $CI_COMMIT_BRANCH == "main"
