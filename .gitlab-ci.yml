@@ -26,8 +26,8 @@ cost-approval:
     - echo "Le coût a été analysé. Veuillez vérifier les logs du job 'infracost-breakdown' avant d'approuver."
   when: manual
   allow_failure: false
-  # rules:
-  #   - if: $CI_COMMIT_BRANCH == "main"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
 deploy-infrastructure:
   stage: deploy
@@ -39,6 +39,5 @@ deploy-infrastructure:
     - terraform fmt -check
     - terraform validate
     - terraform plan -lock=false
-
-  # rules:
-  #   - if: $CI_COMMIT_BRANCH == "main"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
