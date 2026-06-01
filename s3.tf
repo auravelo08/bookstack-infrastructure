@@ -1,7 +1,3 @@
-############################################
-# S3 BUCKET (privé)
-############################################
-
 resource "aws_s3_bucket" "bookstack" {
   bucket = "bookstack-${var.environment}-${var.project}"
 
@@ -29,10 +25,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bookstack" {
   }
 }
 
-############################################
-# CLOUDFRONT OAC (Origin Access Control)
-############################################
-
 resource "aws_cloudfront_origin_access_control" "bookstack_oac" {
   name                              = "bookstack-oac"
   description                       = "OAC for BookStack S3"
@@ -40,10 +32,6 @@ resource "aws_cloudfront_origin_access_control" "bookstack_oac" {
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
-
-############################################
-# CLOUDFRONT DISTRIBUTION
-############################################
 
 resource "aws_cloudfront_distribution" "bookstack_cdn" {
   enabled = true
@@ -81,10 +69,6 @@ resource "aws_cloudfront_distribution" "bookstack_cdn" {
   }
 }
 
-############################################
-# S3 BUCKET POLICY (autorise CloudFront uniquement)
-############################################
-
 resource "aws_s3_bucket_policy" "bookstack_policy" {
   bucket = aws_s3_bucket.bookstack.id
 
@@ -108,10 +92,6 @@ resource "aws_s3_bucket_policy" "bookstack_policy" {
     ]
   })
 }
-
-############################################
-# IAM USER POUR BOOKSTACK (upload privé)
-############################################
 
 resource "aws_iam_user" "bookstack_s3_user" {
   name = "bookstack-s3-${var.environment}"
@@ -144,10 +124,6 @@ resource "aws_iam_user_policy" "bookstack_s3_policy" {
     ]
   })
 }
-
-############################################
-# OUTPUTS
-############################################
 
 output "bookstack_s3_access_key" {
   value = aws_iam_access_key.bookstack_s3_key.id
