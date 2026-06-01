@@ -3,7 +3,6 @@ resource "aws_security_group" "swarm_nodes" {
   description = "Allow Swarm internal communication"
   vpc_id      = aws_vpc.main.id
 
-  # SSH depuis le bastion
   ingress {
     description     = "SSH from bastion"
     from_port       = 22
@@ -13,15 +12,13 @@ resource "aws_security_group" "swarm_nodes" {
   }
 
   ingress {
-    description = "Allow SSH from Gitlab Runner"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    # On autorise le Security Group du Runner directement
+    description     = "Allow SSH from Gitlab Runner"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
     security_groups = [aws_security_group.gitlab_runner_sg.id]
   }
 
-  # Swarm manager
   ingress {
     from_port = 2377
     to_port   = 2377
@@ -29,7 +26,6 @@ resource "aws_security_group" "swarm_nodes" {
     self      = true
   }
 
-  # Swarm communication
   ingress {
     from_port = 7946
     to_port   = 7946
@@ -44,7 +40,6 @@ resource "aws_security_group" "swarm_nodes" {
     self      = true
   }
 
-  # Overlay network
   ingress {
     from_port = 4789
     to_port   = 4789
@@ -60,7 +55,6 @@ resource "aws_security_group" "swarm_nodes" {
     security_groups = [aws_security_group.bastion_sg.id]
   }
 
-  # Autoriser l'ALB à communiquer avec les nœuds sur le port de BookStack
   ingress {
     description     = "Traffic from ALB"
     from_port       = 6875
@@ -69,7 +63,6 @@ resource "aws_security_group" "swarm_nodes" {
     security_groups = [aws_security_group.alb_sg.id] # Référence au SG du futur ALB
   }
 
-  # Autoriser l'ALB à communiquer avec Prometheus
   ingress {
     description     = "Traffic from ALB to Prometheus"
     from_port       = 9090
@@ -78,7 +71,6 @@ resource "aws_security_group" "swarm_nodes" {
     security_groups = [aws_security_group.alb_sg.id]
   }
 
-  # Autoriser l'ALB à communiquer avec Grafana
   ingress {
     description     = "Traffic from ALB to Grafana"
     from_port       = 3000
@@ -87,7 +79,6 @@ resource "aws_security_group" "swarm_nodes" {
     security_groups = [aws_security_group.alb_sg.id]
   }
 
-  # Autoriser l'ALB (ou le Manager) à collecter les métriques Node Exporter
   ingress {
     description     = "Traffic from ALB/Manager to Node Exporter"
     from_port       = 9100
@@ -96,7 +87,6 @@ resource "aws_security_group" "swarm_nodes" {
     security_groups = [aws_security_group.alb_sg.id] # Ou le SG du Manager si besoin
   }
 
-  # Sortie Internet via NAT
   egress {
     from_port   = 0
     to_port     = 0
@@ -123,7 +113,6 @@ resource "aws_instance" "swarm_nodes" {
   associate_public_ip_address = false
   key_name                    = var.keypair_name
 
-  # 🔥 Ajout du disque EBS (20 Go recommandé)
   root_block_device {
     volume_size = 30
     volume_type = "gp3"

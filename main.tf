@@ -1,6 +1,3 @@
-############################################
-# VPC
-############################################
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
@@ -11,9 +8,6 @@ resource "aws_vpc" "main" {
   }
 }
 
-############################################
-# Internet Gateway
-############################################
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
@@ -22,9 +16,6 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-############################################
-# Public Subnets
-############################################
 resource "aws_subnet" "public" {
   count                   = length(var.azs)
   vpc_id                  = aws_vpc.main.id
@@ -37,9 +28,6 @@ resource "aws_subnet" "public" {
   }
 }
 
-############################################
-# Private Subnets
-############################################
 resource "aws_subnet" "private" {
   count             = length(var.azs)
   vpc_id            = aws_vpc.main.id
@@ -51,9 +39,6 @@ resource "aws_subnet" "private" {
   }
 }
 
-############################################
-# Public Route Table
-############################################
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
@@ -73,9 +58,6 @@ resource "aws_route_table_association" "public_assoc" {
   route_table_id = aws_route_table.public.id
 }
 
-############################################
-# Private Route Table (empty)
-############################################
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 

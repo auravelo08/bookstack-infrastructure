@@ -1,15 +1,9 @@
-############################################
-# NAT Instance (Correction : True fck-nat AMI)
-############################################
-
-# 1. Aller chercher la vraie AMI officielle de fck-nat
 data "aws_ami" "fck_nat" {
   most_recent = true
   owners      = ["568608671756"] # ID du compte officiel de fck-nat
 
   filter {
-    name = "name"
-    # Ce filtre est plus large et attrape toutes les versions stables (amzn2 ou alpine)
+    name   = "name"
     values = ["fck-nat-*"]
   }
 
@@ -40,13 +34,11 @@ resource "aws_security_group" "fck_nat_sg" {
 }
 
 resource "aws_instance" "fck_nat" {
-  ami                    = data.aws_ami.fck_nat.id # <-- Utilise la vraie AMI dynamique
+  ami                    = data.aws_ami.fck_nat.id
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.public[0].id
   source_dest_check      = false
   vpc_security_group_ids = [aws_security_group.fck_nat_sg.id]
-
-  # PLUS BESOIN DE USER_DATA ! L'AMI officielle fck-nat gère le NAT nativement au boot.
 
   tags = {
     Name = "fck-nat"
@@ -61,9 +53,6 @@ resource "aws_eip" "fck_nat_eip" {
   }
 }
 
-############################################
-# ENI Lookup for NAT Instance (Terraform v5 requirement)
-############################################
 data "aws_network_interface" "fck_nat_eni" {
   filter {
     name   = "attachment.instance-id"
@@ -71,9 +60,6 @@ data "aws_network_interface" "fck_nat_eni" {
   }
 }
 
-############################################
-# Private Route → NAT ENI
-############################################
 resource "aws_route" "private_default" {
   route_table_id         = aws_route_table.private.id
   destination_cidr_block = "0.0.0.0/0"

@@ -32,10 +32,6 @@
         state: started
         enabled: yes
 
-    # -----------------------------
-    # INSTALLATION DOCKER
-    # -----------------------------
-
     - name: Installer les dépendances pour Docker
       ansible.builtin.apt:
         name:
@@ -82,10 +78,6 @@
         state: started
         enabled: yes
 
-    # -----------------------------
-    # FIX PERMISSIONS DOCKER
-    # -----------------------------
-
     - name: Ajouter l'utilisateur gitlab-runner au groupe docker
       ansible.builtin.user:
         name: gitlab-runner
@@ -101,10 +93,6 @@
       ansible.builtin.systemd:
         name: gitlab-runner
         state: restarted
-
-    # -----------------------------
-    # CONFIGURATION DU RUNNER
-    # -----------------------------
 
     - name: Supprimer l'ancien fichier de configuration GitLab Runner
       ansible.builtin.file:

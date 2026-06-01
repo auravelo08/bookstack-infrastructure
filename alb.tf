@@ -1,6 +1,3 @@
-############################################
-# ALB Security Group
-############################################
 resource "aws_security_group" "alb_sg" {
   name        = "bookstack-alb-sg"
   description = "Allow inbound HTTP traffic from internet"
@@ -21,9 +18,6 @@ resource "aws_security_group" "alb_sg" {
   }
 }
 
-############################################
-# Application Load Balancer
-############################################
 resource "aws_lb" "bookstack_alb" {
   name               = "bookstack-alb"
   internal           = false
@@ -46,7 +40,6 @@ resource "aws_lb_target_group" "bookstack_tg" {
   }
 }
 
-# Target Group pour Grafana
 resource "aws_lb_target_group" "grafana_tg" {
   name     = "grafana-tg"
   port     = 3000
@@ -54,7 +47,7 @@ resource "aws_lb_target_group" "grafana_tg" {
   vpc_id   = aws_vpc.main.id
 
   health_check {
-    path                = "/grafana/login" # Chemin réel de la page de login
+    path                = "/grafana/login"
     port                = "traffic-port"
     protocol            = "HTTP"
     healthy_threshold   = 2
@@ -62,7 +55,6 @@ resource "aws_lb_target_group" "grafana_tg" {
   }
 }
 
-# Target Group pour Prometheus
 resource "aws_lb_target_group" "prometheus_tg" {
   name     = "prometheus-tg"
   port     = 9090
@@ -70,7 +62,7 @@ resource "aws_lb_target_group" "prometheus_tg" {
   vpc_id   = aws_vpc.main.id
 
   health_check {
-    path                = "/prometheus/-/healthy" # Point de santé standard Prometheus
+    path                = "/prometheus/-/healthy"
     port                = "traffic-port"
     protocol            = "HTTP"
     healthy_threshold   = 2
@@ -78,7 +70,6 @@ resource "aws_lb_target_group" "prometheus_tg" {
   }
 }
 
-# Attacher les 3 instances du cluster Swarm au Target Group
 resource "aws_lb_target_group_attachment" "swarm_nodes" {
   count            = 3
   target_group_arn = aws_lb_target_group.bookstack_tg.arn
