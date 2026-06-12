@@ -4,7 +4,7 @@
   become: yes
 
   tasks:
-    # 1. Nettoyage et Prérequis
+    
     - name: Mettre à jour le cache apt
       ansible.builtin.apt:
         update_cache: yes
@@ -17,7 +17,6 @@
           - gnupg
         state: present
 
-    # 2. Configuration du dépôt officiel Docker
     - name: Créer le répertoire pour les clés GPG
       ansible.builtin.file:
         path: /etc/apt/keyrings
@@ -36,7 +35,6 @@
         state: present
         filename: docker
 
-    # 3. Installation de Docker Engine et du plugin Compose
     - name: Installer Docker et ses composants
       ansible.builtin.apt:
         name:
@@ -44,11 +42,10 @@
           - docker-ce-cli
           - containerd.io
           - docker-buildx-plugin
-          - docker-compose-plugin # C'est le Docker Compose V2 moderne
+          - docker-compose-plugin 
         state: present
         update_cache: yes
 
-    # 4. Configuration des droits
     - name: S'assurer que le groupe docker existe
       ansible.builtin.group:
         name: docker
@@ -66,7 +63,6 @@
         state: started
         enabled: yes
 
-    # 1. Créer le dossier de destination sur l'EC2
     - name: Créer le répertoire pour le monitoring
       ansible.builtin.file:
         path: /opt/monitoring
@@ -75,21 +71,18 @@
         owner: ubuntu
         group: ubuntu
 
-    # 2. Envoyer le fichier docker-compose.yml
     - name: Copier le fichier docker-compose.yml
       ansible.builtin.copy:
         src: ./docker-compose.yml
         dest: /opt/monitoring/docker-compose.yml
         mode: '0644'
 
-    # 3. Envoyer le fichier prometheus.yml
     - name: Copier la configuration Prometheus
       ansible.builtin.copy:
         src: ./prometheus.yml
         dest: /opt/monitoring/prometheus.yml
         mode: '0644'
 
-    # 4. Lancer les conteneurs (Docker Compose)
     - name: Lancer le stack via Docker Compose
       ansible.builtin.shell:
         cmd: docker compose up -d
